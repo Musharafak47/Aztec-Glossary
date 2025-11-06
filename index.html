@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Glossary - Aztec & ZK Concepts</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #1e293b;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #334155;
+    }
+
+    h1 {
+      margin: 0;
+      color: #38bdf8;
+    }
+
+    .search-filter {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 20px;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+    }
+
+    #glossary {
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 10px 20px 40px;
+    }
+
+    .term {
+      background-color: #1e293b;
+      border-left: 4px solid #38bdf8;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      transition: 0.3s ease;
+    }
+
+    .term:hover {
+      background-color: #334155;
+    }
+
+    .category {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .definition {
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background: #1e293b;
+      border-top: 2px solid #334155;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🧠 Interactive Glossary: Aztec & Zero-Knowledge Concepts</h1>
+  </header>
+
+  <div class="search-filter">
+    <input type="text" id="searchBox" placeholder="Search a term..." />
+  </div>
+
+  <div id="glossary"></div>
+
+  <footer>Created by Tech World 🌐 | Open-source Glossary Project</footer>
+
+  <script>
+    const glossaryData = [
+      // === Original ZK & Aztec Terms ===
+      { term: "Zero-Knowledge Proof (ZKP)", definition: "A protocol where a Prover convinces a Verifier that a statement is true without revealing any information other than the truth of the statement itself. Aztec uses these extensively to prove transaction validity while keeping details private." },
+      { term: "zkRollup", definition: "A scaling solution that batches thousands of transactions off-chain, proves their validity using ZKPs, and posts a single proof to Ethereum (L1). Aztec is a privacy-first zkRollup." },
+      { term: "zk-SNARK", definition: "Stands for Zero-Knowledge Succinct Non-Interactive Argument of Knowledge. These proofs are highly succinct and fast to verify, making them suitable for on-chain verification. Aztec's proving system is built upon this family of proofs (specifically, the PLONK protocol)." },
+      { term: "PLONK", definition: "A universal, updateable zk-SNARK protocol co-invented by Aztec Labs. It is the core proof system powering the network." },
+      { term: "Barretenberg", definition: "Aztec's high-performance, open-source C++ and WASM library. It is the cryptographic backend used for generating and verifying the ZKPs (PLONK proofs) both on the client-side (PXE) and by the Sequencers." },
+      { term: "Noir", definition: "A specialized, Rust-like Domain Specific Language (DSL) for writing Zero-Knowledge smart contracts and circuits. It compiles ZK programs into an intermediate representation (ACIR), making it backend-agnostic." },
+      { term: "ACIR", definition: "Abstract Circuit Intermediate Representation. The universal intermediate language that the Noir compiler translates smart contracts into, allowing them to work across different proving backends (like Barretenberg)." },
+      { term: "Private Execution Environment (PXE)", definition: "Aztec's client-side execution layer. It is a local node/library that manages private keys, stores encrypted state (Notes), generates ZKPs for private functions, and computes the encrypted results of transactions." },
+      { term: "Nullifier Tree", definition: "A Merkle tree maintained on-chain that records the nullifiers of all spent Notes. Its sole purpose is to enforce the unspent aspect of the UTXO model and prevent double-spending." },
+      { term: "Note Hash Tree", definition: "A Merkle tree that stores commitments (hashed values) to all created Notes, allowing users to prove a Note’s existence without revealing its content." },
+      { term: "Native Account Abstraction", definition: "An architectural design where every user account is implemented as a smart contract. This provides flexibility for customized authentication, key management, and transaction logic." },
+      { term: "Commitment", definition: "A cryptographic function that allows a party to commit to a chosen value while keeping it hidden, with the ability to reveal it later. Notes are stored as commitments in the Note Hash Tree." },
+      { term: "Merkle Tree", definition: "A hash-based data structure used to efficiently and securely verify the inclusion of data (like Notes or state) without downloading everything." },
+
+      // === New Aztec Network Terms ===
+      { term: "Aztec Network", definition: "A decentralized, privacy-first Layer 2 (L2) scaling solution built on Ethereum. It functions as a zero-knowledge rollup (zkRollup) that supports smart contracts with both private and public execution." },
+      { term: "Zero-Knowledge Rollup (zkRollup)", definition: "A scaling technique that bundles thousands of transactions off-chain, proves their validity using Zero-Knowledge Proofs (ZKPs), and submits a single, compressed proof to the Ethereum (L1) mainnet for verification." },
+      { term: "Private Execution Environment (PXE)", definition: "Pronounced 'pixie.' This is Aztec's client-side execution layer. It runs locally on a user's device, handling all private logic, managing private state (Notes), and generating the necessary Zero-Knowledge Proofs to ensure maximum privacy." },
+      { term: "Aztec Virtual Machine (AVM)", definition: "The public-facing execution environment where public functions of smart contracts are executed by Sequencers, similar to the Ethereum Virtual Machine (EVM)." },
+      { term: "Noir", definition: "A specialized, Rust-based Domain Specific Language (DSL) for writing Zero-Knowledge smart contracts and circuits for the Aztec Network." },
+      { term: "Hybrid State Model", definition: "Aztec's unique approach to state management, combining UTXO-based private state (encrypted Notes and a Nullifier Tree) with account-based public state (similar to Ethereum)." },
+      { term: "Note (Value Note / Asset Note)", definition: "The fundamental unit of private state in Aztec, representing an encrypted chunk of value or asset. Based on the UTXO (Unspent Transaction Output) model." },
+      { term: "Nullifier", definition: "A cryptographic identifier generated when a private Note is 'spent' or invalidated. Nullifiers are recorded in the Nullifier Tree to prevent double-spending of private funds." },
+      { term: "Sequencer", definition: "A network node responsible for assembling unprocessed transactions into blocks, executing public functions, and submitting the block data and validity proofs to the Ethereum Rollup Processor Contract." },
+      { term: "Rollup Processor Contract", definition: "The main Ethereum (L1) smart contract that holds user deposits, facilitates communication with L1, and verifies the zkRollup blocks and proofs submitted by Sequencers." },
+      { term: "Native Account Abstraction", definition: "An Aztec feature where every user account is a smart contract. This enables flexible authorization, multi-signature wallets, and social recovery." },
+      { term: "Viewing Key", definition: "Also called the Account Key or Decryption Key. This private key decrypts the Notes linked to an account, allowing the user to view their private balances and transactions." },
+      { term: "Spending Key", definition: "A private key that can spend Notes on behalf of an account. It authorizes private transactions in the Aztec Network." },
+      { term: "Barretenberg", definition: "Aztec’s high-performance cryptography backend used to generate and verify Zero-Knowledge Proofs." },
+      { term: "Halloumi", definition: "Aztec's Proof Creation service that manages proof generation jobs." },
+      { term: "Falafel", definition: "The name for the Aztec client implementation, part of the Sequencer service." }
+    ];
+
+    const glossaryContainer = document.getElementById("glossary");
+    const searchBox = document.getElementById("searchBox");
+
+    function renderGlossary() {
+      const searchTerm = searchBox.value.toLowerCase();
+      glossaryContainer.innerHTML = "";
+
+      glossaryData
+        .filter(item => 
+          item.term.toLowerCase().includes(searchTerm) || 
+          item.definition.toLowerCase().includes(searchTerm)
+        )
+        .forEach(item => {
+          const div = document.createElement("div");
+          div.classList.add("term");
+          div.innerHTML = `
+            <h3>${item.term}</h3>
+            <div class="definition">${item.definition}</div>
+          `;
+          glossaryContainer.appendChild(div);
+        });
+    }
+
+    searchBox.addEventListener("input", renderGlossary);
+    renderGlossary();
+  </script>
+</body>
+</html>
